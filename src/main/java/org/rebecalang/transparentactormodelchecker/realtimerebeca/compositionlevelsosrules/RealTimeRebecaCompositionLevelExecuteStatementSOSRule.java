@@ -12,6 +12,7 @@ import org.rebecalang.transparentactormodelchecker.realtimerebeca.networklevelso
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.statementlevelsosrules.RealTimeRebecaResumeSOSRule;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.action.MessageAction;
+import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.action.TimeProgressAction;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.state.RealTimeRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.state.RealTimeRebecaNetworkState;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.state.RealTimeRebecaSystemState;
@@ -22,8 +23,10 @@ import org.rebecalang.transparentactormodelchecker.realtimerebeca.utils.HybridRe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 @Component
 public class RealTimeRebecaCompositionLevelExecuteStatementSOSRule extends AbstractRealTimeSOSRule<RealTimeRebecaSystemState> {
@@ -34,32 +37,56 @@ public class RealTimeRebecaCompositionLevelExecuteStatementSOSRule extends Abstr
     @Autowired
     RealTimeRebecaNetworkReceiveSOSRule hybridRebecaNetworkLevelReceiveMessageSOSRule = new RealTimeRebecaNetworkReceiveSOSRule();
 
-//    public boolean isLastTransitionNonDet = false;
-
     @Override
     public RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> applyRule(RealTimeRebecaSystemState source) {
         ArrayList<RealTimeRebecaAbstractTransition> transitions = new ArrayList<>();
+        ArrayList<RealTimeRebecaAbstractTransition> execTransitions = new ArrayList<>();
         RealTimeRebecaSystemState backup = HybridRebecaStateSerializationUtils.clone(source);
 
         for(String actorId : backup.getActorsState().keySet()) {
-                RealTimeRebecaActorState realTimeRebecaActorState = source.getActorState(actorId);
-                realTimeRebecaActorState.setNow(source.getNow());
-//                if (realTimeRebecaActorState.isSuspent()) {
-//                    EndMethodInstructionBean endMethodInstructionBean = new EndMethodInstructionBean();
-//                    RealTimeRebecaResumeSOSRule rebecaResumeSOSRule = new RealTimeRebecaResumeSOSRule();
-//                    RealTimeRebecaAbstractTransition<Pair<RealTimeRebecaActorState, InstructionBean>> executionResult2 =
-//                            rebecaResumeSOSRule.applyRule(new Pair<>(realTimeRebecaActorState, endMethodInstructionBean));
-//                    if (executionResult2 != null) {
-//
-//                    }
-//                }
-                if (realTimeRebecaActorState.noScopeInstructions()) {
-                    continue;
-                }
+            RealTimeRebecaActorState realTimeRebecaActorState = source.getActorState(actorId);
+            realTimeRebecaActorState.setNow(source.getNow());
 
+            if (realTimeRebecaActorState.isSuspent()) {
+                EndMethodInstructionBean endMethodInstructionBean = new EndMethodInstructionBean();
+                RealTimeRebecaResumeSOSRule rebecaResumeSOSRule = new RealTimeRebecaResumeSOSRule();
+                RealTimeRebecaAbstractTransition<Pair<RealTimeRebecaActorState, InstructionBean>> executionResult2 =
+                        rebecaResumeSOSRule.applyRule(new Pair<>(realTimeRebecaActorState, endMethodInstructionBean));
+
+                if(executionResult2 instanceof RealTimeRebecaDeterministicTransition<Pair<RealTimeRebecaActorState, InstructionBean>>) {
+                    RealTimeRebecaDeterministicTransition<Pair<RealTimeRebecaActorState, InstructionBean>> transition =
+                            (RealTimeRebecaDeterministicTransition<Pair<RealTimeRebecaActorState, InstructionBean>>)executionResult2;
+                    transition.setAction(((RealTimeRebecaDeterministicTransition<Pair<RealTimeRebecaActorState, InstructionBean>>) executionResult2).getAction());
+                    RealTimeRebecaActorState as =((RealTimeRebecaDeterministicTransition<Pair<RealTimeRebecaActorState, InstructionBean>>) executionResult2).getDestination().getFirst();
+                    as.setRILModel(realTimeRebecaActorState.getRILModel());
+                    backup.setActorState(actorId, as);
+                    transitions.add(new RealTimeRebecaDeterministicTransition(transition.getAction(), backup));
+                }
+                else if(executionResult2 instanceof RealTimeRebecaNondeterministicTransition<Pair<RealTimeRebecaActorState, InstructionBean>>) {
+                    RealTimeRebecaNondeterministicTransition result = new RealTimeRebecaNondeterministicTransition<RealTimeRebecaSystemState>();
+                    Iterator<Pair<? extends Action, Pair<RealTimeRebecaActorState, InstructionBean>>> transitionsIterator = executionResult2.getDestinations().iterator();
+                    while(transitionsIterator.hasNext()) {
+                        RealTimeRebecaSystemState backup1 = HybridRebecaStateSerializationUtils.clone(source);
+                        Pair<? extends Action, Pair<RealTimeRebecaActorState, InstructionBean>> transition = transitionsIterator.next();
+                        RealTimeRebecaActorState actorState = transition.getSecond().getFirst();
+                        actorState.setRILModel(realTimeRebecaActorState.getRILModel());
+                        backup1.setActorState(actorState.getId(), actorState);
+                        transitions.add(new RealTimeRebecaDeterministicTransition(transition.getFirst(), backup1));
+//                            result.addDestination(transition.getFirst(), backup1);
+//                            transitions.add(result);
+                    }
+                }
+                continue;
+            }
+
+            else if (realTimeRebecaActorState.noScopeInstructions()) {
+                continue;
+            }
+
+            if (!realTimeRebecaActorState.isSuspent()) {
                 for (int i = 0; i <= realTimeRebecaActorState.getSigma().size() ; i++) {
                     if (realTimeRebecaActorState.isSuspent()) {
-                        continue;
+                        break;
                     }
                     RealTimeRebecaAbstractTransition<RealTimeRebecaActorState> executionResult =
                             hybridRebecaActorLevelExecuteStatementSOSRule.applyRule(realTimeRebecaActorState);
@@ -76,7 +103,7 @@ public class RealTimeRebecaCompositionLevelExecuteStatementSOSRule extends Abstr
                             transition.setAction(Action.TAU);
                         }
                         backup.setActorState(actorId, ((RealTimeRebecaDeterministicTransition<RealTimeRebecaActorState>) executionResult).getDestination());
-                        transitions.add(new RealTimeRebecaDeterministicTransition(transition.getAction(), backup));
+                        execTransitions.add(new RealTimeRebecaDeterministicTransition(transition.getAction(), backup));
                     }
                     else if(executionResult instanceof RealTimeRebecaNondeterministicTransition<RealTimeRebecaActorState>) {
                         RealTimeRebecaNondeterministicTransition result = new RealTimeRebecaNondeterministicTransition<RealTimeRebecaSystemState>();
@@ -87,7 +114,6 @@ public class RealTimeRebecaCompositionLevelExecuteStatementSOSRule extends Abstr
                             Pair<? extends Action, RealTimeRebecaActorState> transition = transitionsIterator.next();
                             RealTimeRebecaActorState actorState = transition.getSecond();
                             backup1.setActorState(actorState.getId(), actorState);
-//                            transitions.addDestination(transition.getFirst(), backup1);
                             transitions.add(new RealTimeRebecaDeterministicTransition(transition.getFirst(), backup1));
                             if(transition.getFirst() instanceof MessageAction) {
                                 action = (MessageAction) transition.getFirst();
@@ -107,9 +133,42 @@ public class RealTimeRebecaCompositionLevelExecuteStatementSOSRule extends Abstr
                     }
                 }
             }
+        }
 
-        if (transitions.isEmpty()) return new RealTimeRebecaDeterministicTransition<>(Action.TAU, backup);
-        return transitions.get(transitions.size() - 1);
+        if (transitions.isEmpty() && execTransitions.isEmpty()) return new RealTimeRebecaDeterministicTransition<>(Action.TAU, backup);
+        if (transitions.size() > 1) {
+            RealTimeRebecaNondeterministicTransition result2 = new RealTimeRebecaNondeterministicTransition();
+            for (RealTimeRebecaAbstractTransition transition : transitions) {
+                RealTimeRebecaDeterministicTransition transition2 = (RealTimeRebecaDeterministicTransition) transition;
+                Object dest = transition2.getDestination();
+                Action act = transition2.getAction();
+                result2.addDestination(act, dest);
+            }
+
+            if (!execTransitions.isEmpty()) {
+                RealTimeRebecaDeterministicTransition dest = (RealTimeRebecaDeterministicTransition) execTransitions.get(execTransitions.size() - 1);
+                result2.addDestination(dest.getAction(), dest.getDestination());
+            }
+            return result2;
+        }
+
+        if(transitions.size() == 1) {
+            if (execTransitions.isEmpty()) return transitions.get(0);
+
+            RealTimeRebecaNondeterministicTransition result2 = new RealTimeRebecaNondeterministicTransition();
+            RealTimeRebecaDeterministicTransition dest = (RealTimeRebecaDeterministicTransition) execTransitions.get(execTransitions.size() - 1);
+            result2.addDestination(Action.TAU ,dest.getDestination());
+            RealTimeRebecaDeterministicTransition transition2 = (RealTimeRebecaDeterministicTransition) transitions.get(0);
+            result2.addDestination(transition2.getAction(), transition2.getDestination());
+            return result2;
+        }
+
+        if (!execTransitions.isEmpty()) {
+            RealTimeRebecaDeterministicTransition dest = (RealTimeRebecaDeterministicTransition) execTransitions.get(execTransitions.size() - 1);
+            return dest;
+        }
+        return null;
+//        return transitions.get(transitions.size() - 1);
     }
 
     @Override

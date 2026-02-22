@@ -1,0 +1,22 @@
+reactiveclass A(2) {
+
+    A() {
+       delay(1,4);
+       self.doA();
+    }
+
+    msgsrv doA(){}
+}
+
+reactiveclass B(2) {
+    B(){
+        delay(2, 3);
+        self.doB();
+    }
+    msgsrv doB(){}
+}
+
+main {
+    A a() : ();
+    B b() : ();
+}

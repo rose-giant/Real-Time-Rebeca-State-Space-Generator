@@ -119,16 +119,16 @@ public class ApplySystemLevelRules {
         RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> result;
 
         // ===== highest priority: resume =====
-        if (state.thereIsSuspension()) {
-            RealTimeRebecaResumeSOSRule rule = new RealTimeRebecaResumeSOSRule();
-            result = rule.systemLevelResumePostpone(state);
-            if (result != null) {
-                return result;
-            }
-        }
+//        if (state.thereIsSuspension()) {
+//            RealTimeRebecaResumeSOSRule rule = new RealTimeRebecaResumeSOSRule();
+//            result = rule.systemLevelResumePostpone(state);
+//            if (result != null) {
+//                return result;
+//            }
+//        }
 
         // ===== then execute statements =====
-        if (systemCanExecuteStatements(state)) {
+        if (systemCanExecuteStatements(state) || systemCanResume(state)) {
             result = levelExecuteStatementSOSRule.applyRule(state);
             if (result != null) {
                 return result;
@@ -160,7 +160,20 @@ public class ApplySystemLevelRules {
     public boolean systemCanExecuteStatements(RealTimeRebecaSystemState initialState) {
         for(String actorId : initialState.getActorsState().keySet()) {
             RealTimeRebecaActorState realTimeRebecaActorState = initialState.getActorState(actorId);
-            if (!realTimeRebecaActorState.noScopeInstructions() && !realTimeRebecaActorState.isSuspent()) {
+            if ((!realTimeRebecaActorState.noScopeInstructions()) && !realTimeRebecaActorState.isSuspent()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean systemCanResume(RealTimeRebecaSystemState initialState) {
+        for(String actorId : initialState.getActorsState().keySet()) {
+            RealTimeRebecaActorState realTimeRebecaActorState = initialState.getActorState(actorId);
+            if (realTimeRebecaActorState.getResumeTime().getFirst().floatValue() ==
+                    realTimeRebecaActorState.getNow().getFirst().floatValue() && ( (!realTimeRebecaActorState.noScopeInstructions()) ||
+                    realTimeRebecaActorState.isSuspent()) ) {
                 return true;
             }
         }

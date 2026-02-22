@@ -1,0 +1,25 @@
+reactiveclass A(3){
+	knownrebecs{
+	    B b;
+    }
+
+	A(){
+	    b.m1() after(0.2, 0.3);
+	    delay(0.1, 0.4);
+		b.m2() after(0.1, 0.5);
+    }
+}
+
+reactiveclass B(3){
+    msgsrv m1(){
+    }
+    msgsrv m2(){
+    	delay(0.3, 0.4);
+    }
+
+}
+
+main {
+	A a(b): ();
+	B b(): ();
+}

@@ -18,19 +18,65 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+
 public class RealTimeRebecaRunner {
-    private static String RealTime_MODEL_FILES_BASE = "src/test/resources/org/rebecalang/modelchecker/realtimerebeca/";
+
     @Autowired
     static Rebeca2RILModelTransformer rebeca2RIL;
 
     @Autowired
-    static RebecaModelCompiler rebecaModelCompiler = new RebecaModelCompiler();
+    static RebecaModelCompiler rebecaModelCompiler;
 
-    protected static Pair<RebecaModel, SymbolTable> compileModel(File model, Set<CompilerExtension> extension, CoreVersion coreVersion) {
+    protected static Pair<RebecaModel, SymbolTable> compileModel(
+            File model,
+            Set<CompilerExtension> extension,
+            CoreVersion coreVersion
+    ) {
         return rebecaModelCompiler.compileRebecaFile(model, extension, coreVersion);
     }
 
     public static void main(String[] args) throws Exception {
+
+        // ---------------------------
+        // Argument Handling
+        // ---------------------------
+
+        if (args.length < 1) {
+            System.out.println("Usage:");
+            System.out.println("  java -jar modelchecker.jar <model-file> [startInterval endInterval]");
+            System.out.println();
+            System.out.println("Example:");
+            System.out.println("  java -jar modelchecker.jar examples/motivatingexample.rebeca 0 300");
+            System.exit(1);
+        }
+
+        String modelPath = args[0];
+
+        float startInterval = 0f;
+        float endInterval = 300f;
+
+        if (args.length >= 3) {
+            startInterval = Float.parseFloat(args[1]);
+            endInterval = Float.parseFloat(args[2]);
+        }
+
+        File model = new File(modelPath);
+
+        if (!model.exists()) {
+            System.out.println("Error: Model file not found: " + model.getAbsolutePath());
+            System.exit(1);
+        }
+
+        System.out.println("Model: " + model.getAbsolutePath());
+        System.out.println("Input Interval: [" + startInterval + ", " + endInterval + "]");
+
+        // ---------------------------
+        // Spring Context Setup
+        // ---------------------------
+
         AnnotationConfigApplicationContext context =
                 new AnnotationConfigApplicationContext(
                         CompilerConfig.class,
@@ -40,21 +86,28 @@ public class RealTimeRebecaRunner {
         rebecaModelCompiler = context.getBean(RebecaModelCompiler.class);
         rebeca2RIL = context.getBean(Rebeca2RILModelTransformer.class);
 
-        String modelName = "motivatingexample";
-        File model = new File(RealTime_MODEL_FILES_BASE + modelName + ".rebeca");
+        // ---------------------------
+        // Compilation Phase
+        // ---------------------------
 
-        System.out.println("Model is: " + model.getAbsolutePath());
-
-        Set<CompilerExtension> extension;
-        extension = new HashSet<>();
+        Set<CompilerExtension> extension = new HashSet<>();
         extension.add(CompilerExtension.HYBRID_REBECA);
 
         Pair<RebecaModel, SymbolTable> compilationResult =
                 compileModel(model, extension, CoreVersion.CORE_2_3);
 
-        Pair<Float, Float> inputInterval = new Pair<>(0f, 300f);
+        // ---------------------------
+        // Transformation Phase
+        // ---------------------------
 
-        RILModel transformModel = rebeca2RIL.transformModel(compilationResult, extension, CoreVersion.CORE_2_3);
+        RILModel transformModel =
+                rebeca2RIL.transformModel(compilationResult, extension, CoreVersion.CORE_2_3);
+
+        Pair<Float, Float> inputInterval = new Pair<>(startInterval, endInterval);
+
+        // ---------------------------
+        // State Space Generation
+        // ---------------------------
 
         GenerateInitialState generateInitialState =
                 new GenerateInitialState(transformModel, inputInterval);
@@ -62,6 +115,12 @@ public class RealTimeRebecaRunner {
         ApplySystemLevelRules applySystemLevelRules =
                 new ApplySystemLevelRules(generateInitialState.getInitialState());
 
-        System.out.println("Execution started successfully and output was written in output.dot, paste the content in graghviz online to see the visualized state space nicely!");
+        System.out.println("--------------------------------------------------");
+        System.out.println("Execution finished successfully.");
+        System.out.println("Output written to: output.dot");
+        System.out.println("Use Graphviz to visualize the state space.");
+        System.out.println("--------------------------------------------------");
+
+        context.close();
     }
 }

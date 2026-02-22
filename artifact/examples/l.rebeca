@@ -1,0 +1,19 @@
+reactiveclass A(2) {
+    statevars {
+        flaot temp;
+        int w;
+    }
+    A() {
+        temp = ?(10, 12);
+        if (temp < 11) {
+            w = 0;
+        } else {
+            w = 1;
+        }
+    }
+
+}
+
+main {
+    A a():();
+}

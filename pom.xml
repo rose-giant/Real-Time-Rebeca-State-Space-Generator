@@ -226,8 +226,9 @@
 							<appendAssemblyId>false</appendAssemblyId>
 							<archive>
 								<manifest>
-									<mainClass>
-										org.rebecalang.modelchecker.RebecaModelChecker</mainClass>
+                                    <mainClass>
+                                        org.rebecalang.transparentactormodelchecker.realtimerebeca.RealTimeRebecaRunner
+                                    </mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>

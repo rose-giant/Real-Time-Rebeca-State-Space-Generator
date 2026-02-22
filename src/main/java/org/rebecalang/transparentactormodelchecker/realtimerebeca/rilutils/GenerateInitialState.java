@@ -58,7 +58,8 @@ public class GenerateInitialState {
             String actorType = instantiation.getType().getTypeName();
             newActor.setRILModel(rilModel);
 //            TODO: add the constructor to the scope
-            newActor.addScope(actorType + "." + actorType);
+
+            newActor.addScope(newActor.getFullName(actorType + "." + actorType));
 
             Map<String, Object> knownRebecs = instantiation.getBindings();
             for (Map.Entry<String, Object> entry : knownRebecs.entrySet()) {

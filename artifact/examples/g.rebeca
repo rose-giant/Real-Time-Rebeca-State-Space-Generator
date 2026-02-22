@@ -1,0 +1,67 @@
+const int Ts_min = 70;
+const int Ts_max = 70;
+
+const int Dnet_min = 25;
+const int Dnet_max = 25;
+
+const int Tcrit = 200;
+const int D_safe = 100;
+
+reactiveclass Sensor {
+    knownrebecs { CollisionMonitor cm; }
+
+    statevars {
+        int distance;
+        int velocity;
+    }
+
+    msgsrv init() {
+        self.sample();
+    }
+
+    msgsrv sample() {
+        // chosen values for THIS scenario
+        distance = 120;
+        velocity = 2;
+
+        cm.sensorData(distance, velocity)
+            after(Dnet_min, Dnet_max);
+
+        self.sample()
+            after(Ts_min, Ts_max);
+    }
+}
+
+reactiveclass CollisionMonitor {
+    knownrebecs { Controller ctrl; }
+
+    msgsrv sensorData(int d, int v) {
+        if (v > 0 && d / v <= Tcrit) {
+            ctrl.collisionDetected()
+                deadline(D_safe);
+        }
+    }
+}
+
+reactiveclass Controller {
+    statevars {
+        boolean braking;
+    }
+
+    msgsrv collisionDetected() {
+        braking = true;
+        self.brake();
+    }
+
+    msgsrv brake() {
+        // braking command issued
+    }
+}
+
+main {
+    Controller ctrl();
+    CollisionMonitor cm(ctrl);
+    Sensor s(cm);
+
+    s.init();
+}

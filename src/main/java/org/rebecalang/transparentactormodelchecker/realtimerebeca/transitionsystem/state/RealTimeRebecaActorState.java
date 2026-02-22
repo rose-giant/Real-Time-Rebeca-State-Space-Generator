@@ -210,6 +210,16 @@ public class RealTimeRebecaActorState extends RealTimeRebecaAbstractState implem
         return rilModel.getInstructionList(scopes.get(scopes.size() - 1).getBlockName());
     }
 
+    public String getFullName(String blockName) {
+        for (String key : rilModel.getMethodNames()) {
+            if (key.startsWith(blockName)) {
+                return key;
+            }
+        }
+
+        return "";
+    }
+
     public boolean noScopeInstructions() {
         if (scopes.isEmpty()) return true;
         boolean noInstructions = scopes.get(scopes.size()-1).getPC() == this.getSigma().size() - 1 ;

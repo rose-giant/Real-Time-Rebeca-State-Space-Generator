@@ -203,7 +203,7 @@ public class StateSpaceGenTest {
 
     @Test
     public void newTests() {
-        String modelName = "motivatingexample";  // Using the simple "main" model here
+        String modelName = "z";  // Using the simple "main" model here
         File model = new File(HYBRID_MODEL_FILES_BASE + modelName + ".rebeca");
         System.out.println("model is" + model);
         Set<CompilerExtension> extension;

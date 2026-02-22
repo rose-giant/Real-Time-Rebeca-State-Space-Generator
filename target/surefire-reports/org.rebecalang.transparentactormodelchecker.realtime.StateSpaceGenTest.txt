@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.rebecalang.transparentactormodelchecker.realtime.StateSpaceGenTest
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.907 s -- in org.rebecalang.transparentactormodelchecker.realtime.StateSpaceGenTest

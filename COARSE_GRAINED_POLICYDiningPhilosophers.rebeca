@@ -1,9 +1,0 @@
-S0 [label="S0"];
-S1[label="S1"];
-S0 -> S1[label="phil1.ARRIVE [START,END]"];
-S1[label="S1"];
-S0 -> S1[label="phil0.ARRIVE [START,END]"];
-S1[label="S1"];
-S1 -> S1[label="phil0.ARRIVE [START,END]"];
-S1[label="S1"];
-S1 -> S1[label="fork0.REQUEST [START,END]"];

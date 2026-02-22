@@ -1,7 +1,0 @@
-S0 [label="S0"];
-S1[label="S1"];
-S0 -> S1[label="pi.PING [START,2]"];
-S1[label="S1"];
-S1 -> S1[label="pi.PING [2,END]"];
-S1[label="S1"];
-S1 -> S1[label="po.PONG [START,2]"];

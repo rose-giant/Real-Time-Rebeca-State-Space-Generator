@@ -1,9 +1,0 @@
-S0 [label="S0"];
-S1[label="S1"];
-S0 -> S1[label="sensor2.GATHERDATA$BYTE [START,END]"];
-S1[label="S1"];
-S0 -> S1[label="sensor1.GATHERDATA$BYTE [START,END]"];
-S1[label="S1"];
-S1 -> S1[label="cu2.RECEIVEDATA$BYTE [START,END]"];
-S1[label="S1"];
-S1 -> S1[label="sensor1.GATHERDATA$BYTE [START,END]"];

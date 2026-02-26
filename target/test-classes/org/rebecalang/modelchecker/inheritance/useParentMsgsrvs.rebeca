@@ -1,0 +1,28 @@
+abstract reactiveclass Parent(3) {
+    msgsrv msg1() {
+        run();
+    }
+    abstract void run();
+}
+
+abstract reactiveclass Middle extends Parent(4) {
+
+    void run() {
+        self.msg2();
+    }
+    abstract msgsrv msg2();
+}
+
+reactiveclass Child extends Middle(4) {
+
+    Child() {
+        self.msg1();
+    }
+    msgsrv msg2() {
+        self.msg1();
+    }
+}
+
+main {
+    Child c():();
+}

@@ -40,7 +40,7 @@ public class StateSpaceGenTest {
     @Autowired
     public ExceptionContainer exceptionContainer;
 
-    private String HYBRID_MODEL_FILES_BASE = "src/test/resources/org/rebecalang/modelchecker/realtimerebeca/";
+    private String HYBRID_MODEL_FILES_BASE = "src/test/resources/org/rebecalang/modelchecker/aartifact/";
 
     protected Pair<RebecaModel, SymbolTable> compileModel(File model, Set<CompilerExtension> extension, CoreVersion coreVersion) {
         return rebecaModelCompiler.compileRebecaFile(model, extension, coreVersion);
@@ -203,7 +203,7 @@ public class StateSpaceGenTest {
 
     @Test
     public void newTests() {
-        String modelName = "z";  // Using the simple "main" model here
+        String modelName = "testcase9";  // Using the simple "main" model here
         File model = new File(HYBRID_MODEL_FILES_BASE + modelName + ".rebeca");
         System.out.println("model is" + model);
         Set<CompilerExtension> extension;

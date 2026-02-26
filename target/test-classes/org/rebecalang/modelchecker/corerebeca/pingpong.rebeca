@@ -1,0 +1,28 @@
+reactiveclass Ping(3) {
+	knownrebecs {
+		Pong po;
+	}
+	Ping() {
+		self.ping();
+	}
+
+	msgsrv ping() {
+		po.pong();
+	}
+}
+reactiveclass Pong(3) {
+	knownrebecs {
+		Ping pi;
+	}
+	Pong() {
+
+	}
+	msgsrv pong() {
+		pi.ping();
+	}
+}
+
+main {
+	Ping pi(po):();
+	Pong po(pi):();
+}

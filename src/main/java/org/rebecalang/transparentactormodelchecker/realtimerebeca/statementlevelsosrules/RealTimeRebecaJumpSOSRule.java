@@ -1,10 +1,7 @@
 package org.rebecalang.transparentactormodelchecker.realtimerebeca.statementlevelsosrules;
 
 import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.JumpIfNotInstructionBean;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.NonDetValue;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.*;
 import org.rebecalang.transparentactormodelchecker.AbstractRealTimeSOSRule;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.state.RealTimeRebecaActorState;
@@ -43,8 +40,9 @@ public class RealTimeRebecaJumpSOSRule extends AbstractRealTimeSOSRule<Pair<Real
         JumpIfNotInstructionBean jumpIfNotInstructionBean = (JumpIfNotInstructionBean) source.getSecond();
         RealTimeRebecaActorState originalState = HybridRebecaStateSerializationUtils.clone(source.getFirst());
         Pair<RealTimeRebecaActorState, InstructionBean> originalSource = new Pair<>();
+        originalState.setRILModel(source.getFirst().getRILModel());
         originalSource.setFirst(originalState);
-        originalSource.setSecond(source.getSecond());
+        originalSource.setSecond(new PushARInstructionBean());
         Object conditionEval = null;
         if (jumpIfNotInstructionBean.getCondition() instanceof Variable) {
             Variable var = (Variable) jumpIfNotInstructionBean.getCondition();
@@ -57,6 +55,7 @@ public class RealTimeRebecaJumpSOSRule extends AbstractRealTimeSOSRule<Pair<Real
                 new RealTimeRebecaDeterministicTransition<>();
         backup1.moveToNextStatement();
         source.setFirst(backup1);
+        source.setSecond(new PushARInstructionBean());
         ifResult.setDestination(source);
         ifResult.setAction(Action.TAU);
 

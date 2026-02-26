@@ -1,0 +1,36 @@
+reactiveclass PingActor(3) {
+    knownrebecs {
+        PongActor po;
+    }
+    statevars {
+    }
+
+    PingActor() {
+        self.ping();
+    }
+    msgsrv ping() {
+        po.pong() after(2);
+        delay(2);
+    }
+}
+
+reactiveclass PongActor(3) {
+    knownrebecs {
+           PingActor pi;
+        }
+    statevars {
+    }
+
+    PongActor() {
+    }
+
+    msgsrv pong() {
+        pi.ping() after(1);
+        delay(1);
+    }
+}
+
+main {
+    PingActor p1(p2):();
+    PongActor p2(p1):();
+}

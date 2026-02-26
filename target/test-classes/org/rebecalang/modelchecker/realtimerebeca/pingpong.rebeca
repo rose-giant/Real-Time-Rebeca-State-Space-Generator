@@ -1,0 +1,42 @@
+reactiveclass Ping(2){
+    knownrebecs{
+        Pong pong;
+    }
+    Ping(){
+        self.ping();
+    }
+    msgsrv ping() {
+         pong.pong() after(1, 2);
+    }
+    msgsrv stop(){
+    }
+}
+
+reactiveclass Pong(2){
+    knownrebecs{
+        Ping ping;
+    }
+    msgsrv pong() {
+        ping.ping() after(3, 4);
+    }
+        msgsrv stop(){
+    }
+}
+
+reactiveclass Timer(2){
+    knownrebecs{
+        Pong pong;
+        Ping ping;
+    }
+    Timer (){
+        delay(3, 3);
+        ping.stop();
+        pong.stop();
+    }
+}
+
+main{
+    Ping ping(pong):();
+    Pong pong(ping):();
+    Timer timer(pong, ping):();
+}

@@ -1,0 +1,38 @@
+
+reactiveclass Controller(1) {
+    knownrebecs {
+    }
+
+    statevars {
+        int t;
+    }
+
+    Controller() {
+        t = 12;
+    }
+
+    msgsrv compute(){
+        t = 12;
+        t = t * 22;
+    }
+}
+
+reactiveclass Sensor(1) {
+    knownrebecs {
+        Controller controller;
+    }
+
+    statevars {
+        int s;
+    }
+
+    Sensor() {
+        s = 12;
+        controller.compute();
+    }
+}
+
+main {
+    Controller controller():();
+    Sensor sensor(controller):();
+}

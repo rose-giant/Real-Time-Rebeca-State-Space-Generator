@@ -1,0 +1,45 @@
+reactiveclass Ping(3) {
+    knownrebecs {
+        Pong po;
+        Pung pu;
+    }
+    msgsrv ping() {
+        if(sender instanceof Pong)
+            pu.pung();
+        else if(sender instanceof Pung) {
+            po.pong();
+        }
+    }
+}
+
+reactiveclass Pong(4) {
+    knownrebecs {
+        Ping pi;
+    }
+
+    Pong() {
+        self.pong();
+    }
+    msgsrv pong() {
+        pi.ping();
+    }
+}
+
+reactiveclass Pung(4) {
+    knownrebecs {
+        Ping pi;
+    }
+
+    Pung() {
+        self.pung();
+    }
+    msgsrv pung() {
+        pi.ping();
+    }
+}
+
+main {
+    Ping p1(p2, p3):();
+    Pong p2(p1):();
+    Pung p3(p1):();
+}

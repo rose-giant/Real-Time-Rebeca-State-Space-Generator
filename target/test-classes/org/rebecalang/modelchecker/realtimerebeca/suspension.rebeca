@@ -1,0 +1,11 @@
+reactiveclass A(2) {
+    A(){
+        delay(0.1, 0.5);
+        int a;
+        a = 12;
+    }
+}
+
+main{
+    A a():();
+}

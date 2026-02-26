@@ -1,0 +1,25 @@
+reactiveclass A(3){
+	knownrebecs{
+        B b;
+    }
+    A(){
+        int p = 1;
+        int q = 2;
+        add(p, q);
+        //delay(0.2, 0.4);
+        //b.m1() after(0.1, 0.5);
+    }
+    void add(int a, int b){
+        int c = a + b;
+        return c;
+    }
+}
+reactiveclass B(3){
+    //msgsrv m1(){
+        //delay(0.2, 0.4);
+    //}
+}
+main {
+	A a(b): ();
+	B b(): ();
+}

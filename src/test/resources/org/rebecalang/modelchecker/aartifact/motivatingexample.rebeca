@@ -1,0 +1,60 @@
+reactiveclass Controller(2) {
+      knownrebecs {
+          Alarm a;
+      }
+      Controller() {}
+
+      msgsrv control(float t) {
+          if (t < 18.5) {
+              a.notify() after (0.3, 0.5);
+          }
+      }
+}
+
+reactiveclass Alarm(2) {
+    statevars {
+        int count;
+    }
+    Alarm() {}
+
+    msgsrv notify() {
+        count = 2;
+        self.beep();
+    }
+
+    msgsrv beep() {
+        if (count > 0) {
+            delay (0.2, 0.4);
+            self.beep();
+            count = count - 1;
+        }
+    }
+}
+
+reactiveclass AbstractSensor(2) {
+    knownrebecs {
+        Controller c;
+    }
+    statevars {
+        int temp;
+    }
+
+    AbstractSensor() {
+        self.trigger();
+    }
+
+    msgsrv trigger() {
+        temp = ?(18, 19);
+        delay(1,2);
+        c.control(temp) after (0.5,1);
+        temp = ?(21, 23);
+        delay(2,5);
+    }
+
+}
+
+main {
+    Alarm a():();
+    Controller c(a):();
+    AbstractSensor as(c):();
+}

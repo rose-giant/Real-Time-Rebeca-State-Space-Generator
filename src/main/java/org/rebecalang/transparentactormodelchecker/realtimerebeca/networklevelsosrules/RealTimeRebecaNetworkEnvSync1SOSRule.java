@@ -24,10 +24,6 @@ public class RealTimeRebecaNetworkEnvSync1SOSRule extends AbstractRealTimeSOSRul
         float minEta = source.getMinETA();
 
         progress.setFirst(now.getSecond().floatValue());
-        TimeSyncHelper timeSyncHelper = new TimeSyncHelper();
-//        if ( (!(minEta < now.getSecond().floatValue()) ) && (!(minEte == now.getSecond().floatValue())) ) {
-//            progress.setSecond(timeSyncHelper.Up(now.getSecond().floatValue(), firstB, secondB));
-//        }
         if (!source.isEmpty()) {
             progress.setFirst(firstB);
             progress.setSecond(secondB);
@@ -49,6 +45,5 @@ public class RealTimeRebecaNetworkEnvSync1SOSRule extends AbstractRealTimeSOSRul
     public RealTimeRebecaAbstractTransition<RealTimeRebecaNetworkState> applyRule(Action synchAction, RealTimeRebecaNetworkState source) {
         return null;
     }
-
 
 }

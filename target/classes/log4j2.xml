@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- No need to set system property "log4j2.contextSelector" to any value 
+	when using <asyncLogger> or <asyncRoot>. -->
+
+<Configuration status="WARN">
+	<Appenders>
+		<RandomAccessFile name="RandomAccessFile"
+			fileName="ModelChecker.log" immediateFlush="true"
+			append="false">
+			<PatternLayout>
+				<Pattern>%d %p [%t] %location %m %ex%n</Pattern>
+			</PatternLayout>
+		</RandomAccessFile>
+	</Appenders>
+	<Loggers>
+		<!-- pattern layout actually uses location, so we need to include it -->
+		<Root level="info" includeLocation="true">
+			<AppenderRef ref="RandomAccessFile" />
+		</Root>
+	</Loggers>
+</Configuration>

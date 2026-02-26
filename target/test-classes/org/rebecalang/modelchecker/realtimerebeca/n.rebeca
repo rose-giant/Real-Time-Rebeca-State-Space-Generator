@@ -1,0 +1,25 @@
+reactiveclass Alarm(2) {
+    statevars {
+        int count;
+    }
+    Alarm() {
+        self.notify();
+    }
+
+    msgsrv notify() {
+        count = 3;
+        self.beep();
+    }
+
+    msgsrv beep() {
+        if (count > 0) {
+            delay (0.2, 0.4);
+            self.beep();
+            count = count - 1;
+        }
+    }
+}
+
+main {
+    Alarm a():();
+}

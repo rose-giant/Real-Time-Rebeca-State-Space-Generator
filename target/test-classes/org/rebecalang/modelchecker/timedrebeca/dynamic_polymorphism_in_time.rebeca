@@ -1,0 +1,65 @@
+reactiveclass A (2)  {
+    statevars {
+		int var_a;
+	}
+
+    msgsrv msg_ab() {
+        var_a=3;
+    }
+
+    int method_ab(A reb_a) {
+        int a = 3;
+        if (1 > 2) {
+            a = 2;
+        }
+        return a;
+    }
+}
+
+reactiveclass B extends A (3){
+    statevars {
+		int var_b;
+	}
+	msgsrv msg_ab() {
+        var_a=5;
+    }
+	int method_ab(A reb_a) {
+	    reb_a.msg_ab();
+	}
+}
+
+reactiveclass B2 extends B (3){
+    statevars {
+		int var_b2;
+	}
+}
+
+reactiveclass C (1)  {
+    knownrebecs {
+        A inst_a;
+    }
+    statevars {
+        int s_c;
+	}
+
+    msgsrv msg_c() {
+         inst_a.msg_ab();
+         self.s_c = 6;
+         s_c = inst_a.method_ab(inst_a);
+         //s_c = method_c();
+    }
+
+    C () {
+        msg_c();
+    }
+
+    int method_c() {
+        return 7;
+    }
+
+}
+
+main {
+    B2 b2():();
+    C c(b2):();
+}

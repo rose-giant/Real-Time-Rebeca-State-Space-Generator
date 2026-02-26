@@ -1,0 +1,62 @@
+reactiveclass Sensor(3) {
+	knownrebecs{
+		CompUnit cu;
+	}
+	
+	Sensor() {
+		self.gatherData(1);
+	}
+	
+	msgsrv gatherData(byte data) {
+		cu.receiveData(data);
+	}
+}
+
+reactiveclass CompUnit(3) {
+	knownrebecs {
+		Network network;
+		Sensor sensor;
+	}
+	statevars {
+		int cnt;
+	}
+	
+	CompUnit() {
+		cnt = 0;
+	}
+
+	msgsrv receiveData(byte data) {
+		cnt++;
+		if(cnt == 4) {
+			cnt = 0;
+			network.send();
+		} else {
+			sensor.gatherData(data);
+		}
+	}	
+	msgsrv back() {
+		sensor.gatherData(1);
+	}
+}
+
+reactiveclass Network (3) {
+	knownrebecs {
+		CompUnit cu1;
+		CompUnit cu2;
+	}
+	msgsrv send() {
+		// Send data according to a protocol
+		if (sender==cu1)
+			cu1.back();
+		if (sender==cu2)
+			cu2.back();
+	}
+}
+
+main {
+	Sensor sensor1(cu1):();
+	Sensor sensor2(cu2):();
+	CompUnit cu1(network, sensor1):();
+	CompUnit cu2(network, sensor2):();
+	Network network(cu1, cu2):();
+}

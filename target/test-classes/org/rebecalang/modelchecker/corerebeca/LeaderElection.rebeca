@@ -1,0 +1,74 @@
+reactiveclass Node(5) { 
+    knownrebecs { 
+	    Node nodeL; 
+        Node nodeR; 
+    } 
+      
+    statevars { 
+    	int id;
+		int phase;
+		boolean oneResponseIsAlreadyReceived;
+		int leaderId;
+    } 
+  
+    Node (int myId) { 
+		id = myId;
+		phase = 0;
+		oneResponseIsAlreadyReceived = true;
+		leaderId = -1;
+		self.broadcast(id, false, 0);
+    } 
+  
+	msgsrv broadcast(int msgId, boolean out, int hopCount) {
+		if(out) {
+			if(msgId == id) {
+				leaderId = id;
+				nodeR.leaderIsElected(id);
+			} else {
+				if(hopCount == 1) {
+					if(msgId < id)
+						((Node)sender).broadcast(msgId, false, 0);
+				} else {
+					if(msgId < id) {
+						if(sender == nodeL) {
+							nodeR.broadcast(msgId, out, hopCount - 1);
+						} else {
+							nodeL.broadcast(msgId, out, hopCount - 1);
+						}
+					}
+				}
+			}
+		} else {
+			if(msgId == id) {			
+				if(oneResponseIsAlreadyReceived) {
+					nodeL.broadcast(id, true, (int)pow(2, phase));
+					nodeR.broadcast(id, true, (int)pow(2, phase));
+					phase++;
+					oneResponseIsAlreadyReceived = false;
+				} else {
+					oneResponseIsAlreadyReceived = true;
+				}
+			} else {
+				if(sender == nodeL) {
+					nodeR.broadcast(msgId, false, 0);
+				} else {
+					nodeL.broadcast(msgId, false, 0);
+				}
+			}
+		}
+	}
+	msgsrv leaderIsElected(int selectedLeaderId) {
+		leaderId = selectedLeaderId;
+		if(leaderId != id)
+			nodeR.leaderIsElected(selectedLeaderId);
+		else
+			self.leaderIsElected(id);
+	}
+} 
+  
+main { 
+      Node node1(node4,node2):(1); 
+      Node node2(node1,node3):(2); 
+      Node node3(node2,node4):(3); 
+      Node node4(node3,node1):(4); 
+} 

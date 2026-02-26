@@ -1,0 +1,18 @@
+
+reactiveclass Controller(1) {
+    knownrebecs {
+    }
+
+    statevars {
+        int t;
+    }
+
+    Controller() {
+        t = 12;
+        t = 8;
+    }
+}
+
+main {
+    Controller controller():();
+}

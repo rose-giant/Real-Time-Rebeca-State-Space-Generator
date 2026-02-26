@@ -1,0 +1,22 @@
+reactiveclass A(2) {
+    statevars{
+        int v;
+        int d;
+    }
+
+    A() {
+        v = 12;
+        d = ?(120, 1200);
+
+        if (v > 0 && d/v <= 200) {
+            self.collisionDetected();
+        }
+    }
+
+    msgsrv collisionDetected() {}
+
+}
+
+main {
+    A a():();
+}

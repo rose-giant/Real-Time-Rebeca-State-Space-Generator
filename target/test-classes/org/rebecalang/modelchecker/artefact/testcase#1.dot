@@ -1,0 +1,7 @@
+digraph G {
+    rankdir=LR;
+
+    s0 -> s1 [label="(TAU)"];
+    s1 -> s2 [label="(TAU)"];
+    s2 -> s3 [label="((3.4028235E38, 3.4028235E38))"];
+}

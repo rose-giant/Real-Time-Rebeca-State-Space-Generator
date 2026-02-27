@@ -1,0 +1,14 @@
+reactiveclass A(2) {
+      A() {
+          float t = ?(18, 19);
+          if (t < 18.5) {
+              self.m1();
+          }
+      }
+
+      msgsrv m1(){}
+}
+
+main{
+    A a():();
+}

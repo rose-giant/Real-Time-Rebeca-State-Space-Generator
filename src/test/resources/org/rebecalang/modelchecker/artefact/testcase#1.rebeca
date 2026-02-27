@@ -1,0 +1,12 @@
+reactiveclass A(2) {
+    A() {}
+}
+
+reactiveclass B(2) {
+    B(){}
+}
+
+main {
+    A a() : ();
+    B b() : ();
+}

@@ -1,0 +1,47 @@
+digraph G {
+    rankdir=LR;
+
+    s0 -> s1 [label="(TAU)"];
+    s1 -> s2 [label="(TAU)"];
+    s2 -> s3 [label="((1.0, 2.0))"];
+    s3 -> s4 [label="(TAU)"];
+    s3 -> s5 [label="(TAU)"];
+    s4 -> s6 [label="((2.0, 3.0))"];
+    s6 -> s7 [label="(TAU)"];
+    s6 -> s8 [label="(TAU)"];
+    s6 -> s9 [label="(TAU)"];
+    s7 -> s10 [label="(TAU)"];
+    s7 -> s11 [label="(TAU)"];
+    s7 -> s12 [label="(TAU)"];
+    s10 -> s13 [label="((3.0, 4.0))"];
+    s13 -> s14 [label="(TAU)"];
+    s14 -> s15 [label="(TAU)"];
+    s15 -> s16 [label="((3.4028235E38, 3.4028235E38))"];
+    s11 -> s17 [label="(TAU)"];
+    s17 -> s18 [label="((3.4028235E38, 3.4028235E38))"];
+    s12 -> s19 [label="(TAU)"];
+    s12 -> s20 [label="(TAU)"];
+    s19 -> s21 [label="((3.0, 4.0))"];
+    s21 -> s22 [label="(TAU)"];
+    s22 -> s23 [label="(TAU)"];
+    s23 -> s24 [label="((3.4028235E38, 3.4028235E38))"];
+    s20 -> s25 [label="(TAU)"];
+    s25 -> s26 [label="((3.4028235E38, 3.4028235E38))"];
+    s8 -> s27 [label="(TAU)"];
+    s27 -> s28 [label="(TAU)"];
+    s28 -> s29 [label="((3.0, 4.0))"];
+    s29 -> s30 [label="(TAU)"];
+    s30 -> s31 [label="(TAU)"];
+    s31 -> s32 [label="((3.4028235E38, 3.4028235E38))"];
+    s9 -> s33 [label="(TAU)"];
+    s9 -> s34 [label="(TAU)"];
+    s33 -> s35 [label="(TAU)"];
+    s35 -> s36 [label="((3.4028235E38, 3.4028235E38))"];
+    s34 -> s37 [label="(TAU)"];
+    s37 -> s38 [label="((3.4028235E38, 3.4028235E38))"];
+    s5 -> s39 [label="(TAU)"];
+    s39 -> s40 [label="((2.0, 4.0))"];
+    s40 -> s41 [label="(TAU)"];
+    s41 -> s42 [label="(TAU)"];
+    s42 -> s43 [label="((3.4028235E38, 3.4028235E38))"];
+}

@@ -1,0 +1,48 @@
+reactiveclass A(4){
+    knownrebecs{
+        C c;
+    }
+    A(){
+        c.req() after (0.1,0.5);
+    }
+    msgsrv n(){}
+}
+
+reactiveclass B(4){
+    knownrebecs{
+        D d;
+    }
+    B(){
+        d.inc() after (0.1,0.5);
+    }
+    msgsrv m(){}
+}
+
+reactiveclass C(4){
+    knownrebecs{
+        D d;
+    }
+    msgsrv req(){
+        d.reset() after (0.1,0.2);
+    }
+}
+
+reactiveclass D(4){
+    statevars{
+        int x;
+    }
+    D(){x=0;}
+    msgsrv inc(){
+        x = x+1;
+    }
+    msgsrv reset(){
+        x = 100;
+    }
+}
+
+main{
+    A a(c):();
+    B b(d):();
+    C c(d):();
+    D d():();
+}

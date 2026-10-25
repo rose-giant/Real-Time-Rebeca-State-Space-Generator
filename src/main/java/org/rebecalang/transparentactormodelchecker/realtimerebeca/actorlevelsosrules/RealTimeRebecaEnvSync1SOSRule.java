@@ -25,13 +25,16 @@ public class RealTimeRebecaEnvSync1SOSRule extends AbstractRealTimeSOSRule<RealT
 //                        now.getFirst().floatValue() == now.getSecond().floatValue() &&
 //                        resumeTime.getFirst().floatValue() != resumeTime.getSecond().floatValue())
 //        ) {
-            progress.setFirst(resumeTime.getFirst());
-            progress.setSecond(resumeTime.getSecond());
+//            progress.setFirst(resumeTime.getFirst());
+//            progress.setSecond(resumeTime.getSecond());
+        progress.setFirst(now.getSecond());
+        progress.setSecond(resumeTime.getFirst());
 //        }
 
         //considered the maximum time progress:
         backup.setNow(progress);
-        backup.setResumeTime(new Pair<>(progress.getFirst(), resumeTime.getSecond()));
+//        backup.setResumeTime(new Pair<>(progress.getFirst(), resumeTime.getSecond()));
+        backup.setResumeTime(progress);
         TimeProgressAction action = new TimeProgressAction();
         action.setTimeProgress(progress);
 

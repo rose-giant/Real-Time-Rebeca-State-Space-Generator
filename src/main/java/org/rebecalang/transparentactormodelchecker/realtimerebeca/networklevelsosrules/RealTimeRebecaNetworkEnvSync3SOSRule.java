@@ -50,6 +50,9 @@ public class RealTimeRebecaNetworkEnvSync3SOSRule extends AbstractRealTimeSOSRul
                     TimeProgressAction timeProgressAction = new TimeProgressAction();
                     timeProgressAction.setTimeProgress(progress);
                     result.addDestination(timeProgressAction, backup);
+                } else {
+                    int a = 12;
+                    System.out.println(a);
                 }
             }
         }

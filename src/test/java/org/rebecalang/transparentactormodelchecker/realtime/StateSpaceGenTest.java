@@ -40,7 +40,7 @@ public class StateSpaceGenTest {
     @Autowired
     public ExceptionContainer exceptionContainer;
 
-    private String HYBRID_MODEL_FILES_BASE = "src/test/resources/org/rebecalang/modelchecker/artefact/";
+    private String HYBRID_MODEL_FILES_BASE = "src/test/resources/org/rebecalang/modelchecker/revision/";
 
     protected Pair<RebecaModel, SymbolTable> compileModel(File model, Set<CompilerExtension> extension, CoreVersion coreVersion) {
         return rebecaModelCompiler.compileRebecaFile(model, extension, coreVersion);
@@ -203,7 +203,7 @@ public class StateSpaceGenTest {
 
     @Test
     public void newTests() {
-        String modelName = "motivatingexample";  // Using the simple "main" model here
+        String modelName = "motexample";  // Using the simple "main" model here
         File model = new File(HYBRID_MODEL_FILES_BASE + modelName + ".rebeca");
         System.out.println("model is" + model);
         Set<CompilerExtension> extension;
@@ -214,7 +214,7 @@ public class StateSpaceGenTest {
                 compileModel(model, extension, CoreVersion.CORE_2_3);
 
         // Transform Rebeca model to RILSasdasd
-        Pair<Float, Float> inputInterval = new Pair<>(0f, 300f);
+        Pair<Float, Float> inputInterval = new Pair<>(0f, 5f);
         RILModel transformModel = rebeca2RIL.transformModel(compilationResult, extension, CoreVersion.CORE_2_3);
         GenerateInitialState generateInitialState = new GenerateInitialState(transformModel, inputInterval);
         ApplySystemLevelRules applySystemLevelRules = new ApplySystemLevelRules(generateInitialState.getInitialState());

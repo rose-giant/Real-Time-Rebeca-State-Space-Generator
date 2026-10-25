@@ -16,8 +16,12 @@ public class RealTimeRebecaEnvSync3SOSRule extends AbstractRealTimeSOSRule<RealT
     public RealTimeRebecaAbstractTransition<RealTimeRebecaActorState> applyRule(RealTimeRebecaActorState source) {
         Pair<Float, Float> resumeTime = source.getResumeTime();
         Pair<Float, Float> now = source.getNow();
-        float lower = now.getSecond();
-        float upper = resumeTime.getSecond();
+        float lower = now.getFirst(), upper = now.getSecond();
+        if (now.getFirst() < resumeTime.getFirst()) {
+            lower = now.getSecond();
+            upper = resumeTime.getSecond();
+        }
+
         Pair<Float, Float> progressInterval = new Pair<>(lower, upper);
         RealTimeRebecaActorState backup = HybridRebecaStateSerializationUtils.clone(source);
         backup.setResumeTime(new Pair<>(lower, resumeTime.getSecond()));

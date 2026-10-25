@@ -159,6 +159,8 @@ public class RealTimeRebecaNetworkState implements Serializable {
                 bounds.add(message.getMessageArrivalInterval().getSecond());
             }
         }
+        bounds.add(networkState.getNow().getFirst());
+        bounds.add(networkState.getNow().getSecond());
         List<Float> uniqueSortedBounds = bounds.stream().distinct().sorted().toList();
         bounds.clear();
         for (Float element: uniqueSortedBounds) {

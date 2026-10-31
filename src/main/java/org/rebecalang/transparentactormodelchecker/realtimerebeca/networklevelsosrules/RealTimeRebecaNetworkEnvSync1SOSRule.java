@@ -38,9 +38,9 @@ public class RealTimeRebecaNetworkEnvSync1SOSRule extends AbstractRealTimeSOSRul
             float t2 = thirdB;
 
             // Check the logical condition before modifying the messages.
-            if (!satisfiesTimeProgressCondition(source, now.getFirst(), now.getSecond())) {
-                return result; // The rule is not applicable.
-            }
+//            if (!satisfiesTimeProgressCondition(source, now.getFirst(), now.getSecond())) {
+//                return result; // The rule is not applicable.
+//            }
 
             progress.setFirst(t1);
             progress.setSecond(t2);
@@ -71,39 +71,5 @@ public class RealTimeRebecaNetworkEnvSync1SOSRule extends AbstractRealTimeSOSRul
         return null;
     }
 
-    private boolean satisfiesTimeProgressCondition(RealTimeRebecaNetworkState source, float t1, float t2) {
-        boolean allMessagesSatisfyFirstCondition = true;
-        boolean existsMessageWithLowerBoundBetween = false;
-
-        for (ArrayList<RealTimeRebecaMessage> messages : source.getReceivedMessages().values()) {
-            if (messages == null) {
-                continue;
-            }
-
-            for (RealTimeRebecaMessage msg : messages) {
-
-                Pair<Float, Float> arrivalInterval =
-                        msg.getMessageArrivalInterval();
-
-                float arvL = arrivalInterval.getFirst();
-                float arvU = arrivalInterval.getSecond();
-
-                // Condition A for each message:
-                // arvL != t1 OR arvU > t2
-                if (Float.compare(arvL, t1) == 0 && !(arvU > t2)) {
-                    allMessagesSatisfyFirstCondition = false;
-                }
-
-                // Condition B:
-                // t1 < arvL < t2
-                if (arvL > t1 && arvL < t2) {
-                    existsMessageWithLowerBoundBetween = true;
-                }
-            }
-        }
-
-        // A OR B
-        return allMessagesSatisfyFirstCondition || existsMessageWithLowerBoundBetween;
-    }
 
 }

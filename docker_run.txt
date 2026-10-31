@@ -1,0 +1,7 @@
+docker build -t modelchecker .
+
+# Pass the CLI arguments your runner expects (commons-cli is in your deps)
+docker run --rm modelchecker --help
+
+# To check a model file from your machine, mount a folder:
+docker run --rm -v "$(pwd)/models:/data" modelchecker /data/model.rebeca

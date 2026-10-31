@@ -2,8 +2,6 @@ package org.rebecalang.transparentactormodelchecker.realtimerebeca.compositionle
 
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.TransparentActorStateSpace;
-import org.rebecalang.transparentactormodelchecker.realtimerebeca.networklevelsosrules.RealTimeRebecaNetworkEnvSync3SOSRule;
-import org.rebecalang.transparentactormodelchecker.realtimerebeca.statementlevelsosrules.RealTimeRebecaResumeSOSRule;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.action.MessageAction;
 import org.rebecalang.transparentactormodelchecker.realtimerebeca.transitionsystem.action.TimeProgressAction;

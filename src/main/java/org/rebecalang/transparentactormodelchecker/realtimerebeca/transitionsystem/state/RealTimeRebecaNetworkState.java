@@ -138,6 +138,31 @@ public class RealTimeRebecaNetworkState implements Serializable {
         return false;  // none found
     }
 
+    public boolean overlapTransferable(RealTimeRebecaNetworkState source) {
+        if (source == null || source.getReceivedMessages() == null) {
+            return false;
+        }
+
+        Float nowStart = source.getNow().getFirst();
+        if (nowStart == null) {
+            return false;
+        }
+
+        for (Map.Entry<Pair<String, String>, ArrayList<RealTimeRebecaMessage>> entry
+                : source.getReceivedMessages().entrySet()) {
+
+            for (RealTimeRebecaMessage message : entry.getValue()) {
+
+                Float arrivalStart = message.getMessageArrivalInterval().getFirst();
+                if (arrivalStart != null && arrivalStart.floatValue() <= nowStart.floatValue()) {
+                    return false;   // we found at least one transferable message
+                }
+            }
+        }
+
+        return true;  // none found
+    }
+
     public boolean isEmpty() {
         if (receivedMessages == null || receivedMessages.isEmpty()) {
             return true;

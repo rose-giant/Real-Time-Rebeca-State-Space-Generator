@@ -28,7 +28,7 @@ public class RealTimeRebecaEnvSync1SOSRule extends AbstractRealTimeSOSRule<RealT
 //            progress.setFirst(resumeTime.getFirst());
 //            progress.setSecond(resumeTime.getSecond());
         progress.setFirst(now.getSecond());
-        progress.setSecond(resumeTime.getFirst());
+        progress.setSecond(resumeTime.getSecond());
 //        }
 
         //considered the maximum time progress:

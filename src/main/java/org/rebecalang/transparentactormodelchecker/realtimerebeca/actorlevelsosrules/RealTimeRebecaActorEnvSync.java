@@ -12,15 +12,14 @@ public class RealTimeRebecaActorEnvSync extends AbstractRealTimeSOSRule<RealTime
         Pair<Float, Float> now = source.getNow();
         Pair<Float, Float> resumeTime = source.getResumeTime();
         if (source.messageQueueIsEmpty() && now.getFirst().floatValue() == resumeTime.getFirst().floatValue()) {
-            RealTimeRebecaEnvSync2SOSRule envSync2SOSRule = new RealTimeRebecaEnvSync2SOSRule();
-            return envSync2SOSRule.applyRule(source);
-        }
-        if ((resumeTime.getFirst().floatValue() == now.getFirst().floatValue())
-                && (now.getSecond().floatValue() < resumeTime.getSecond().floatValue()) ) {
             RealTimeRebecaEnvSync3SOSRule envSync3SOSRule = new RealTimeRebecaEnvSync3SOSRule();
             return envSync3SOSRule.applyRule(source);
         }
-        if (now.getFirst().floatValue() != resumeTime.getFirst().floatValue()) {
+        if (now.getFirst().floatValue() < resumeTime.getFirst().floatValue() ) {
+            RealTimeRebecaEnvSync2SOSRule envSync2SOSRule = new RealTimeRebecaEnvSync2SOSRule();
+            return envSync2SOSRule.applyRule(source);
+        }
+        if (now.getFirst().floatValue() == resumeTime.getFirst().floatValue()) {
             RealTimeRebecaEnvSync1SOSRule envSync1SOSRule = new RealTimeRebecaEnvSync1SOSRule();
             return envSync1SOSRule.applyRule(source);
         }

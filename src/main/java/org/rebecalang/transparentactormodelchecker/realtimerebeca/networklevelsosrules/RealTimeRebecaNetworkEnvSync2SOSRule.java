@@ -24,7 +24,7 @@ public class RealTimeRebecaNetworkEnvSync2SOSRule extends AbstractRealTimeSOSRul
         Pair<Float, Float> progress = new Pair<>(0f, 0f);
         float minETA = source.getMinETA();
         float minETE = source.getMinETE();
-        progress.setFirst(now.getSecond());
+        progress.setFirst(minETA);
         progress.setSecond(minETE);
         backup.setNow(progress);
 

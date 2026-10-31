@@ -12,23 +12,25 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RealTimeRebecaEnvSync2SOSRule extends AbstractRealTimeSOSRule<RealTimeRebecaActorState> {
-
     @Override
     public RealTimeRebecaAbstractTransition<RealTimeRebecaActorState> applyRule(RealTimeRebecaActorState source) {
+        Pair<Float, Float> resumeTime = source.getResumeTime();
         Pair<Float, Float> now = source.getNow();
-//        TODO: check it here?? or somewhere at a higher level
-        if (!source.isSuspent() && source.messageQueueIsEmpty()) {
+        float lower = resumeTime.getFirst(), upper = resumeTime.getSecond();
+//        if (now.getFirst() < resumeTime.getFirst()) {
+//            lower = now.getSecond();
+//            upper = resumeTime.getSecond();
+//        }
 
-        }
+        Pair<Float, Float> progressInterval = new Pair<>(lower, upper);
         RealTimeRebecaActorState backup = HybridRebecaStateSerializationUtils.clone(source);
-        float upperBound = Float.MAX_VALUE;
-        float lowerBound = Float.MAX_VALUE;
-        backup.setNow(new Pair<>(lowerBound, upperBound));
+//        backup.setResumeTime(new Pair<>(lower, resumeTime.getSecond()));
+        backup.setNow(progressInterval);
         RealTimeRebecaDeterministicTransition<RealTimeRebecaActorState> result = new RealTimeRebecaDeterministicTransition<>();
-        result.setDestination(backup);
-        TimeProgressAction timeAction = new TimeProgressAction();
-        timeAction.setTimeProgress(new Pair<>(lowerBound, upperBound));
-        result.setAction(timeAction);
+        result.setDestination(source);
+        TimeProgressAction timeProgressAction = new TimeProgressAction();
+        timeProgressAction.setTimeProgress(progressInterval);
+        result.setAction(timeProgressAction);
         return result;
     }
 

@@ -1,4 +1,10 @@
-target
-.git
+@"
 .idea
+.git
 *.iml
+output.dot
+target/test-classes
+target/surefire-reports
+target/generated-sources
+target/generated-test-sources
+"@ | Set-Content -Encoding ascii .dockerignore

@@ -50,23 +50,25 @@ public class ApplySystemLevelRules {
     }
 
     private DotExporter dot = new DotExporter();
-    public void printState(
-            int sourceId,
-            String transitionType,
-            Object action,
-            RealTimeRebecaSystemState destState
-    ) {
+    private final Map<Integer, Float> upperOf = new HashMap<>();
+
+    public void printState(int sourceId, String transitionType, Object action, RealTimeRebecaSystemState destState) {
         int destId = getStateId(destState);
         currentStateIdx++;
+        upperOf.put(destId, destState.getNow().getSecond());
 
         String actionStr = "TAU";
         if (action instanceof MessageAction) {
             actionStr = ((MessageAction) action).getActionLabel();
         } else if (action instanceof TimeProgressAction) {
-            actionStr = ((TimeProgressAction) action)
-                    .getIntervalTimeProgress().toString();
+            Pair<Float, Float> i = ((TimeProgressAction) action).getIntervalTimeProgress();
+            if (i.getFirst() == Float.MAX_VALUE) {
+                Float prevUpper = upperOf.get(sourceId);   // source's upper bound, e.g. 0.7
+                actionStr = "(" + prevUpper + ", ∞)";
+            } else {
+                actionStr = i.toString();
+            }
         }
-
         dot.addTransition(sourceId, transitionType, actionStr, destId);
     }
 

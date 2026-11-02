@@ -20,51 +20,80 @@ import java.util.*;
 public class RealTimeRebecaCompositionLevelEnvProgressSOSRule extends AbstractRealTimeSOSRule<RealTimeRebecaSystemState> {
     @Override
     public RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> applyRule(RealTimeRebecaSystemState source) {
-//        return applyGlobalRule(source);
         return applyLocalRule(source);
     }
 
-    private static RealTimeRebecaDeterministicTransition<RealTimeRebecaSystemState> applyLocalRule(RealTimeRebecaSystemState source) {
-//        ArrayList<Pair<Float, Float>> progressIntervals = new ArrayList<>();
-//        progressIntervals.add(getNetworkSyncInterval(source));
-
-        ArrayList<Pair<Float, Float>> progressIntervals = new ArrayList<>();
-        progressIntervals.addAll(getNetworkSyncIntervals(source));
-
-        RealTimeRebecaSystemState backup = HybridRebecaStateSerializationUtils.clone(source);
-        for(String actorId : backup.getActorsState().keySet()) {
-            RealTimeRebecaActorState actorState = source.getActorState(actorId);
-            progressIntervals.add(getActorSyncInterval(actorState));
+    private static RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> applyLocalRule(RealTimeRebecaSystemState source) {
+        // actor intervals are shared by every branch
+        List<Pair<Float, Float>> actorIntervals = new ArrayList<>();
+        for (String actorId : source.getActorsState().keySet()) {
+            actorIntervals.add(getActorSyncInterval(source.getActorState(actorId)));
         }
 
-        // compute the correct intersection
+        List<Pair<Pair<Float, Float>, RealTimeRebecaNetworkState>> networkResults = getNetworkSyncIntervals(source);
+
+        // one system-level transition per network time-sync rule
+        List<RealTimeRebecaDeterministicTransition<RealTimeRebecaSystemState>> results = new ArrayList<>();
+        if (networkResults.isEmpty()) {
+            results.add(buildProgressTransition(source, actorIntervals, null));
+        } else {
+            for (Pair<Pair<Float, Float>, RealTimeRebecaNetworkState> nr : networkResults) {
+                List<Pair<Float, Float>> progressIntervals = new ArrayList<>(actorIntervals);
+                progressIntervals.add(nr.getFirst());
+                results.add(buildProgressTransition(source, progressIntervals, nr.getSecond()));
+            }
+        }
+
+        if (results.size() == 1) {
+            return results.get(0);
+        }
+        RealTimeRebecaNondeterministicTransition<RealTimeRebecaSystemState> combined =
+                new RealTimeRebecaNondeterministicTransition<>();
+        for (RealTimeRebecaDeterministicTransition<RealTimeRebecaSystemState> r : results) {
+            combined.addDestination(r.getAction(), r.getDestination());
+        }
+        return combined;
+    }
+
+    private static RealTimeRebecaDeterministicTransition<RealTimeRebecaSystemState> buildProgressTransition(
+            RealTimeRebecaSystemState source,
+            List<Pair<Float, Float>> progressIntervals,
+            RealTimeRebecaNetworkState networkDest) {
+
+        RealTimeRebecaSystemState backup = HybridRebecaStateSerializationUtils.clone(source);
+
+        // compute the intersection (unchanged logic)
         float left = Float.MAX_VALUE;
         float right = Float.MAX_VALUE;
-        float maxLeft = Float.MIN_VALUE;
-        for (Pair<Float, Float> interval: progressIntervals) {
+        for (Pair<Float, Float> interval : progressIntervals) {
             if (interval.getSecond() < right) {
                 right = interval.getSecond();
             }
         }
-
-        for (Pair<Float, Float> interval: progressIntervals) {
+        for (Pair<Float, Float> interval : progressIntervals) {
             if (interval.getSecond() < left) {
                 left = interval.getFirst();
             }
             if (interval.getFirst().floatValue() < right && interval.getFirst().floatValue() != left) {
-                //maxLeft = interval.getFirst();
                 right = interval.getFirst();
             }
         }
 
-//        right = Math.min(maxLeft, right);
         Pair<Float, Float> newNow = new Pair<>(left, right);
-        RealTimeRebecaNetworkState networkState = source.getNetworkState();
-        networkState.setNow(newNow);
-        backup.setNetworkState(networkState);
 
-//        TODO: should I remove this??
-        for(String actorId : backup.getActorsState().keySet()) {
+        // safety net: a tp must advance time, otherwise exploration recurses forever
+        if (newNow.getFirst().floatValue() == source.getNow().getFirst().floatValue()
+                && newNow.getSecond().floatValue() == source.getNow().getSecond().floatValue()) {
+            throw new IllegalStateException("tp does not advance time: " + newNow);
+        }
+
+        // install the network's own destination state (carries Upd(b, tl)), then set now on this branch's copy
+        if (networkDest != null) {
+            backup.setNetworkState(HybridRebecaStateSerializationUtils.clone(networkDest));
+        }
+        backup.getNetworkState().setNow(newNow);
+
+        for (String actorId : backup.getActorsState().keySet()) {
             RealTimeRebecaActorState actorState = backup.getActorState(actorId);
             actorState.setNow(newNow);
             if (actorState.getResumeTime().getFirst().floatValue() < newNow.getFirst().floatValue()) {
@@ -73,9 +102,6 @@ public class RealTimeRebecaCompositionLevelEnvProgressSOSRule extends AbstractRe
             if (!actorState.isSuspent()) {
                 actorState.setResumeTime(newNow);
             }
-//            if (actorState.isSuspent() && actorState.getResumeTime().getFirst().floatValue() < newNow.getFirst().floatValue()) {
-//                actorState.setResumeTime(new Pair<>(newNow.getFirst().floatValue(), actorState.getResumeTime().getSecond().floatValue()));
-//            }
         }
 
         RealTimeRebecaDeterministicTransition<RealTimeRebecaSystemState> result = new RealTimeRebecaDeterministicTransition<>();
@@ -84,7 +110,6 @@ public class RealTimeRebecaCompositionLevelEnvProgressSOSRule extends AbstractRe
         result.setAction(timeAction);
         backup.setNow(newNow);
         result.setDestination(backup);
-
         return result;
     }
 
@@ -168,40 +193,31 @@ public class RealTimeRebecaCompositionLevelEnvProgressSOSRule extends AbstractRe
 //        TimeProgressAction timeAction = (TimeProgressAction) detNetworkTransition.getAction();
 //        return timeAction.getIntervalTimeProgress();
 //    }
-    private static List<Pair<Float, Float>> getNetworkSyncIntervals(RealTimeRebecaSystemState source) {
-        RealTimeRebecaNetworkEnvSyncSOSRule envSyncSOSRule =
-                new RealTimeRebecaNetworkEnvSyncSOSRule();
-
-        RealTimeRebecaAbstractTransition<RealTimeRebecaNetworkState> networkTransition = envSyncSOSRule.applyRule(source.getNetworkState());
-        List<Pair<Float, Float>> intervals = new ArrayList<>();
-        // No applicable transition
+    static List<Pair<Pair<Float, Float>, RealTimeRebecaNetworkState>> getNetworkSyncIntervals(RealTimeRebecaSystemState source) {
+        RealTimeRebecaNetworkEnvSyncSOSRule envSyncSOSRule = new RealTimeRebecaNetworkEnvSyncSOSRule();
+        RealTimeRebecaAbstractTransition<RealTimeRebecaNetworkState> networkTransition =
+                envSyncSOSRule.applyRule(source.getNetworkState());
+        List<Pair<Pair<Float, Float>, RealTimeRebecaNetworkState>> result = new ArrayList<>();
         if (networkTransition == null) {
-            return intervals;
+            return result;
         }
 
-        // Case 1: Deterministic transition
         if (networkTransition instanceof RealTimeRebecaDeterministicTransition) {
             RealTimeRebecaDeterministicTransition<RealTimeRebecaNetworkState> t =
                     (RealTimeRebecaDeterministicTransition<RealTimeRebecaNetworkState>) networkTransition;
-            TimeProgressAction timeAction = (TimeProgressAction) t.getAction();
-            intervals.add(timeAction.getIntervalTimeProgress());
-        }
-
-        // Case 2: Nondeterministic transition
-        else if (networkTransition instanceof RealTimeRebecaNondeterministicTransition) {
+            TimeProgressAction a = (TimeProgressAction) t.getAction();
+            result.add(new Pair<>(a.getIntervalTimeProgress(), t.getDestination()));
+        } else if (networkTransition instanceof RealTimeRebecaNondeterministicTransition) {
             RealTimeRebecaNondeterministicTransition<RealTimeRebecaNetworkState> t =
                     (RealTimeRebecaNondeterministicTransition<RealTimeRebecaNetworkState>) networkTransition;
             for (Pair<? extends Action, RealTimeRebecaNetworkState> p : t.getDestinations()) {
-                TimeProgressAction timeAction = (TimeProgressAction) p.getFirst();
-                intervals.add(timeAction.getIntervalTimeProgress());
+                TimeProgressAction a = (TimeProgressAction) p.getFirst();
+                result.add(new Pair<>(a.getIntervalTimeProgress(), p.getSecond()));
             }
-        }
-
-        else {
+        } else {
             throw new IllegalStateException("Unsupported transition type: " + networkTransition.getClass().getName());
         }
-
-        return intervals;
+        return result;
     }
 
     @Override

@@ -52,8 +52,12 @@ public class RealTimeRebecaNetworkEnvSync1SOSRule extends AbstractRealTimeSOSRul
         // Update the lower bound of every message's arrival interval.
         for (ArrayList<RealTimeRebecaMessage> messages : backup.getReceivedMessages().values()) {
             for (RealTimeRebecaMessage msg : messages) {
+//                Pair<Float, Float> arrivalInterval = msg.getMessageArrivalInterval();
+//                arrivalInterval.setFirst(progress.getFirst());
                 Pair<Float, Float> arrivalInterval = msg.getMessageArrivalInterval();
-                arrivalInterval.setFirst(progress.getFirst());
+                if (arrivalInterval.getFirst().floatValue() == now.getFirst().floatValue()) {
+                    arrivalInterval.setFirst(progress.getFirst());
+                }
             }
         }
 

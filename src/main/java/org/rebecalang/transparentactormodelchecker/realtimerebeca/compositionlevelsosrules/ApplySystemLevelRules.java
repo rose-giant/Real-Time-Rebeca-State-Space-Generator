@@ -141,11 +141,24 @@ public class ApplySystemLevelRules {
             return result;
         }
 
+//        // ===== network delivery =====
+//        if (!state.getNetworkState().getReceivedMessages().isEmpty()) {
+//            result = networkDeliverySOSRule.applyRule(state);
+//            if (result != null) {
+//                return result;
+//            }
+//        }
         // ===== network delivery =====
         if (!state.getNetworkState().getReceivedMessages().isEmpty()) {
+            // compute postponement BEFORE delivery, because delivery mutates `state`
+            RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> postpone = null;
+            if (!RealTimeRebecaCompositionLevelEnvProgressSOSRule.getNetworkSyncIntervals(state).isEmpty()
+                    && state.getNetworkState().transferable(state.getNetworkState())) {
+                postpone = new RealTimeRebecaCompositionLevelEnvProgressSOSRule().applyRule(state);
+            }
             result = networkDeliverySOSRule.applyRule(state);
             if (result != null) {
-                return result;
+                return merge(result, postpone);
             }
         }
 
@@ -177,5 +190,25 @@ public class ApplySystemLevelRules {
         }
 
         return false;
+    }
+
+    private RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> merge(
+            RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> a,
+            RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> b) {
+        if (b == null) return a;
+        RealTimeRebecaNondeterministicTransition<RealTimeRebecaSystemState> all =
+                new RealTimeRebecaNondeterministicTransition<>();
+        addAll(a, all);
+        addAll(b, all);
+        return all;
+    }
+
+    private void addAll(RealTimeRebecaAbstractTransition<RealTimeRebecaSystemState> t,
+                        RealTimeRebecaNondeterministicTransition<RealTimeRebecaSystemState> out) {
+        if (t instanceof RealTimeRebecaDeterministicTransition<RealTimeRebecaSystemState> d) {
+            out.addDestination(d.getAction(), d.getDestination());
+        } else if (t instanceof RealTimeRebecaNondeterministicTransition<RealTimeRebecaSystemState> n) {
+            out.addAllDestinations(n.getDestinations());
+        }
     }
 }

@@ -23,7 +23,11 @@ public class RealTimeRebecaNetworkEnvSyncSOSRule extends AbstractRealTimeSOSRule
         RealTimeRebecaNondeterministicTransition<RealTimeRebecaNetworkState> combined =
                 new RealTimeRebecaNondeterministicTransition<>();
 
-        if (satisfiesTimeProgressCondition(source, source.getNow().getFirst(), source.getNow().getSecond())) {
+//        if (satisfiesTimeProgressCondition(source, source.getNow().getFirst(), source.getNow().getSecond())) {
+//            collect(new RealTimeRebecaNetworkEnvSync1SOSRule().applyRule(source), combined);
+//        }
+        if (source.transferable(source)
+                && satisfiesTimeProgressCondition(source, source.getNow().getFirst(), source.getNow().getSecond())) {
             collect(new RealTimeRebecaNetworkEnvSync1SOSRule().applyRule(source), combined);
         }
         if (source.overlapTransferable(source)) {
